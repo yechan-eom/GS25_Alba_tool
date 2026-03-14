@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GS25 알바 도우미</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+header { background: #0077cc; color: white; padding: 16px 20px; text-align: center; }
+header h1 { font-size: 18px; font-weight: 600; }
+header p { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+.tabs { display: flex; background: white; border-bottom: 1px solid #e0e0e0; overflow-x: auto; }
+.tab { flex: 1; min-width: 80px; padding: 12px 8px; font-size: 13px; font-weight: 500; text-align: center; border: none; background: none; color: #888; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+.tab.active { color: #0077cc; border-bottom-color: #0077cc; }
+.panel { display: none; padding: 16px; max-width: 600px; margin: 0 auto; }
+.panel.active { display: block; }
+.card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #1a1a1a; }
+label { font-size: 13px; color: #555; display: block; margin-bottom: 5px; margin-top: 10px; }
+label:first-child { margin-top: 0; }
+input, select, textarea { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; background: white; color: #1a1a1a; font-family: inherit; }
+textarea { resize: vertical; min-height: 70px; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #0077cc; }
+.btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; margin-top: 12px; font-family: inherit; }
+.btn-primary { background: #0077cc; color: white; }
+.btn-primary:active { background: #005fa3; }
+.btn-secondary { background: #f0f0f0; color: #555; padding: 8px 14px; width: auto; margin-top: 0; font-size: 13px; }
+.result-box { background: #f0f7ff; border-left: 3px solid #0077cc; border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.7; margin-top: 12px; white-space: pre-wrap; color: #1a1a1a; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.metric-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.metric { background: #f5f5f5; border-radius: 8px; padding: 12px 8px; text-align: center; }
+.metric-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+.metric-value { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+.total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #eee; }
+.total-label { font-size: 14px; font-weight: 600; }
+.total-value { font-size: 22px; font-weight: 700; color: #0077cc; }
+.item-row { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.item-row:last-child { border-bottom: none; }
+.item-info { flex: 1; }
+.item-name { font-size: 14px; font-weight: 500; }
+.item-sub { font-size: 11px; color: #888; margin-top: 2px; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; white-space: nowrap; }
+.badge-red { background: #ffeaea; color: #cc0000; }
+.badge-orange { background: #fff4e0; color: #cc7700; }
+.badge-green { background: #eafaf0; color: #007733; }
+.del-btn { font-size: 12px; color: #aaa; background: none; border: none; cursor: pointer; padding: 4px 8px; }
+.check-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.check-item:last-child { border-bottom: none; }
+.check-item input[type=checkbox] { width: 18px; height: 18px; flex-shrink: 0; accent-color: #0077cc; }
+.check-label { font-size: 14px; flex: 1; }
+.check-label.done { text-decoration: line-through; color: #aaa; }
+.progress-bar { height: 8px; background: #eee; border-radius: 4px; margin: 10px 0 6px; overflow: hidden; }
+.progress-fill { height: 100%; background: #0077cc; border-radius: 4px; transition: width 0.3s; }
+.progress-text { font-size: 12px; color: #888; margin-bottom: 10px; }
+.add-row { display: flex; gap: 8px; margin-top: 12px; }
+.add-row input { margin: 0; }
+.tip-box { background: #fffbe6; border-left: 3px solid #f0c040; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #664400; line-height: 1.6; margin-top: 4px; }
+.empty { font-size: 13px; color: #aaa; text-align: center; padding: 24px 0; }
+.salary-desc { font-size: 12px; color: #888; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ GS25 알바 도우미</h1>
+  <p>진상대응 · 유통기한 · 발주 · 급여계산</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('mento',this)">😤 진상대응</button>
+  <button class="tab" onclick="switchTab('expiry',this)">📅 유통기한</button>
+  <button class="tab" onclick="switchTab('order',this)">📋 발주체크</button>
+  <button class="tab" onclick="switchTab('salary',this)">💰 급여계산</button>
+</div>
+
+<!-- 진상 대응 -->
+<div class="panel active" id="panel-mento">
+  <div class="card">
+    <div class="card-title">진상 손님 대응 멘트</div>
+    <label>상황 선택</label>
+    <select id="situation" onchange="toggleCustom()">
+      <option value="">-- 상황을 골라주세요 --</option>
+      <option value="price">가격 불만 / 영수증 시비</option>
+      <option value="expired">유통기한 지난 상품</option>
+      <option value="refund">영수증 없이 환불 요구</option>
+      <option value="drunk">술 취한 손님</option>
+      <option value="smoke">금연구역 흡연</option>
+      <option value="age">미성년자 주류/담배 요구</option>
+      <option value="loud">욕설 / 위협</option>
+      <option value="waiting">계산 대기 불만</option>
+    </select>
+    <label>대응 톤</label>
+    <select id="tone">
+      <option value="polite">정중하게</option>
+      <option value="firm">단호하게</option>
+      <option value="calm">차분하게</option>
+    </select>
+    <button class="btn btn-primary" onclick="generateMento()">멘트 생성</button>
+    <div id="mento-result" class="result-box" style="display:none;"></div>
+  </div>
+  <div class="tip-box">💡 베테랑 팁: "죄송합니다"로 시작하고 "규정상"으로 끝내는 게 제일 효과적이에요.</div>
+</div>
+
+<!-- 유통기한 -->
+<div class="panel" id="panel-expiry">
+  <div class="card">
+    <div class="card-title">상품 등록</div>
+    <div class="row2">
+      <div>
+        <label>상품명</label>
+        <input type="text" id="prod-name" placeholder="예: 참치마요 삼각김밥">
+      </div>
+      <div>
+        <label>유통기한</label>
+        <input type="date" id="prod-date">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>카테고리</label>
+        <select id="prod-cat">
+          <option>도시락/김밥</option>
+          <option>음료</option>
+          <option>과자/빵</option>
+          <option>유제품</option>
+          <option>냉장식품</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div>
+        <label>수량</label>
+        <input type="number" id="prod-qty" placeholder="개" min="1" value="1">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addProduct()">등록</button>
+  </div>
+  <div class="card">
+    <div class="card-title">임박 상품 현황</div>
+    <div id="product-list"><div class="empty">등록된 상품이 없어요</div></div>
+  </div>
+</div>
+
+<!-- 발주 체크 -->
+<div class="panel" id="panel-order">
+  <div class="card">
+    <div class="card-title">발주 체크리스트</div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="progress-text" id="prog-text">0 / 12 완료</div>
+    <div id="checklist">
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">도시락류 (삼각김밥, 주먹밥, 도시락)</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">샌드위치 / 햄버거</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">컵라면 / 봉지라면</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">음료수 (탄산/생수/커피)</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">주류 (맥주/소주/막걸리)</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">과자류</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">아이스크림</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">유제품 (우유/요거트)</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">냉장 반찬류</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">담배 재고 확인</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">위생용품 (마스크/장갑)</span></div>
+      <div class="check-item"><input type="checkbox" onchange="updateProg()"><span class="check-label">영수증 용지 교체 확인</span></div>
+    </div>
+    <div class="add-row">
+      <input type="text" id="new-item" placeholder="항목 직접 추가">
+      <button class="btn btn-secondary" onclick="addItem()">추가</button>
+      <button class="btn btn-secondary" onclick="resetCheck()">초기화</button>
+    </div>
+  </div>
+  <div class="tip-box">💡 GS25 발주 마감은 보통 오전 11시 / 오후 5시예요. 점장님께 확인하세요.</div>
+</div>
+
+<!-- 급여 계산 -->
+<div class="panel" id="panel-salary">
+  <div class="card">
+    <div class="card-title">급여 계산기</div>
+    <div class="row2">
+      <div>
+        <label>시급 (원)</label>
+        <input type="number" id="hourly" value="10030">
+      </div>
+      <div>
+        <label>총 근무시간</label>
+        <input type="number" id="total-h" placeholder="예: 80">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>야간 근무시간 (22~06시)</label>
+        <input type="number" id="night-h" placeholder="예: 20" value="0">
+      </div>
+      <div>
+        <label>주휴수당</label>
+        <select id="weekly">
+          <option value="yes">포함</option>
+          <option value="no">미포함</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="calcSalary()">계산하기</button>
+  </div>
+  <div class="card" id="salary-result" style="display:none;">
+    <div class="card-title">이번 달 예상 급여</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">기본급</div><div class="metric-value" id="base-pay">-</div></div>
+      <div class="metric"><div class="metric-label">야간수당</div><div class="metric-value" id="night-pay">-</div></div>
+      <div class="metric"><div class="metric-label">주휴수당</div><div class="metric-value" id="weekly-pay">-</div></div>
+    </div>
+    <div class="total-row">
+      <span class="total-label">총 예상 급여</span>
+      <span class="total-value" id="total-pay">-</span>
+    </div>
+    <div class="salary-desc" id="pay-desc"></div>
+  </div>
+  <div class="tip-box">💡 2025년 최저시급 10,030원. 야간수당(22시~06시)은 기본시급의 1.5배예요.</div>
+</div>
+
+<script>
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+function toggleCustom() {
+  const v = document.getElementById('situation').value;
+}
+
+const mentos = {
+  price: { polite: "죄송합니다, 고객님. 영수증에 표시된 금액이 시스템에서 자동 계산된 정확한 금액입니다. 규정상 임의 변경이 어렵습니다. 불편하시면 점장님께 연결해 드리겠습니다.", firm: "영수증 금액은 POS 시스템에서 자동 계산된 정확한 금액입니다. 규정상 변경이 불가합니다.", calm: "영수증을 같이 확인해 드릴까요? 오류가 있다면 바로 수정해드리겠습니다." },
+  expired: { polite: "죄송합니다, 고객님. 유통기한이 지난 상품은 규정상 판매가 어렵습니다. 교환해 드릴까요?", firm: "유통기한 경과 상품은 판매 불가합니다. 교환 또는 환불 처리해 드리겠습니다.", calm: "저희가 미리 확인하지 못해 죄송해요. 바로 교환해드릴게요." },
+  refund: { polite: "죄송합니다, 규정상 영수증 없이는 환불이 어렵습니다. 카드 결제라면 점장님과 상담해 드릴까요?", firm: "영수증 없는 환불은 규정상 불가합니다.", calm: "영수증이 없으시면 확인이 어렵습니다. 카드 결제라면 명세서로 확인 가능한 경우도 있어요." },
+  drunk: { polite: "고객님, 많이 취하신 것 같아요. 안전을 위해 추가 음주는 도와드리기 어렵습니다.", firm: "만취 상태로 판단되어 주류 판매가 어렵습니다. 법적 규정입니다.", calm: "고객님 많이 피곤하신 것 같아요. 오늘은 여기서 마무리하시는 게 좋을 것 같습니다." },
+  smoke: { polite: "죄송합니다, 고객님. 이 구역은 금연 구역입니다. 흡연 구역으로 이동 부탁드립니다.", firm: "금연 구역입니다. 즉시 흡연을 중단해 주세요. 위반 시 과태료가 부과됩니다.", calm: "고객님, 여기는 금연 구역이에요. 흡연 구역으로 이동해 주시면 감사하겠습니다." },
+  age: { polite: "죄송합니다, 신분증 확인이 필요합니다. 미성년자는 주류와 담배 구매가 법으로 금지되어 있습니다.", firm: "신분증 제시 없이는 판매 불가합니다. 미성년자 판매는 영업정지 처분을 받습니다.", calm: "혹시 신분증 있으세요? 확인 후 도와드릴 수 있을 것 같아요." },
+  loud: { polite: "고객님, 목소리를 조금 낮춰 주시면 감사하겠습니다. 불편하신 점을 차분히 말씀해 주시면 최선을 다해 도와드리겠습니다.", firm: "이 이상 위협적인 행동이 지속되면 경찰에 신고할 수밖에 없습니다.", calm: "어떤 부분이 불편하셨는지 말씀해 주시면 바로 해결해 드리겠습니다." },
+  waiting: { polite: "잠시만 기다려 주세요, 최대한 빠르게 처리해 드리겠습니다. 불편을 드려 죄송합니다.", firm: "순서대로 처리하고 있습니다. 조금만 기다려 주세요.", calm: "거의 다 됐습니다. 조금만 기다려 주시면 감사하겠습니다." }
+};
+
+function generateMento() {
+  const sit = document.getElementById('situation').value;
+  const tone = document.getElementById('tone').value;
+  const box = document.getElementById('mento-result');
+  if (!sit) { alert('상황을 선택해주세요'); return; }
+  box.style.display = 'block';
+  box.textContent = mentos[sit][tone];
+}
+
+let products = [];
+function addProduct() {
+  const name = document.getElementById('prod-name').value.trim();
+  const date = document.getElementById('prod-date').value;
+  const cat = document.getElementById('prod-cat').value;
+  const qty = parseInt(document.getElementById('prod-qty').value) || 1;
+  if (!name || !date) { alert('상품명과 유통기한을 입력해주세요'); return; }
+  products.push({ name, date, cat, qty });
+  products.sort((a,b) => new Date(a.date)-new Date(b.date));
+  renderProducts();
+  document.getElementById('prod-name').value = '';
+  document.getElementById('prod-date').value = '';
+  document.getElementById('prod-qty').value = '1';
+}
+
+function renderProducts() {
+  const list = document.getElementById('product-list');
+  if (!products.length) { list.innerHTML = '<div class="empty">등록된 상품이 없어요</div>'; return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  list.innerHTML = products.map((p,i) => {
+    const exp = new Date(p.date); exp.setHours(0,0,0,0);
+    const diff = Math.round((exp-today)/86400000);
+    let badge = diff < 0 ? '<span class="badge badge-red">기한초과</span>' : diff === 0 ? '<span class="badge badge-red">오늘마감</span>' : diff <= 1 ? '<span class="badge badge-orange">내일마감</span>' : diff <= 3 ? '<span class="badge badge-orange">D-'+diff+'</span>' : '<span class="badge badge-green">D-'+diff+'</span>';
+    return `<div class="item-row"><div class="item-info"><div class="item-name">${p.name}</div><div class="item-sub">${p.cat} · ${p.qty}개 · ${p.date}</div></div>${badge}<button class="del-btn" onclick="delProduct(${i})">삭제</button></div>`;
+  }).join('');
+}
+function delProduct(i) { products.splice(i,1); renderProducts(); }
+
+function updateProg() {
+  const all = document.querySelectorAll('#checklist .check-item');
+  const done = document.querySelectorAll('#checklist input:checked');
+  const pct = all.length ? Math.round(done.length/all.length*100) : 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-text').textContent = done.length+' / '+all.length+' 완료 ('+pct+'%)';
+  all.forEach((item,i) => {
+    const cb = item.querySelector('input');
+    item.querySelector('.check-label').classList.toggle('done', cb.checked);
+  });
+}
+function addItem() {
+  const val = document.getElementById('new-item').value.trim();
+  if (!val) return;
+  const div = document.createElement('div');
+  div.className = 'check-item';
+  div.innerHTML = `<input type="checkbox" onchange="updateProg()"><span class="check-label">${val}</span>`;
+  document.getElementById('checklist').appendChild(div);
+  document.getElementById('new-item').value = '';
+  updateProg();
+}
+function resetCheck() {
+  document.querySelectorAll('#checklist input').forEach(cb => cb.checked=false);
+  document.querySelectorAll('#checklist .check-label').forEach(l => l.classList.remove('done'));
+  updateProg();
+}
+
+function calcSalary() {
+  const hourly = parseFloat(document.getElementById('hourly').value)||10030;
+  const total = parseFloat(document.getElementById('total-h').value)||0;
+  const night = parseFloat(document.getElementById('night-h').value)||0;
+  const inclW = document.getElementById('weekly').value==='yes';
+  if (!total) { alert('근무시간을 입력해주세요'); return; }
+  const base = Math.round((total-night)*hourly);
+  const nightPay = Math.round(night*hourly*0.5);
+  const weeklyPay = inclW ? Math.round((total/40)*hourly*8) : 0;
+  const total2 = base+nightPay+weeklyPay;
+  document.getElementById('base-pay').textContent = base.toLocaleString()+'원';
+  document.getElementById('night-pay').textContent = nightPay.toLocaleString()+'원';
+  document.getElementById('weekly-pay').textContent = weeklyPay.toLocaleString()+'원';
+  document.getElementById('total-pay').textContent = total2.toLocaleString()+'원';
+  document.getElementById('pay-desc').textContent = '총 '+total+'시간 (야간 '+night+'시간 포함)'+(inclW?' + 주휴수당':'');
+  document.getElementById('salary-result').style.display='block';
+}
+
+updateProg();
+</script>
+</body>
+</html>
